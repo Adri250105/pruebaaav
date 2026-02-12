@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microjuegos ODS</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <header>
+        <nav>
+            <div class="logo">ODS Games</div>
+            <ul class="nav-links">
+                <li><a href="#" data-section="home" class="active">Inicio</a></li>
+                <li><a href="#" data-section="play">Jugar</a></li>
+                <li><a href="#" data-section="docs">Documentación</a></li>
+                <li><a href="#" data-section="dev-diary">Diario</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Inicio -->
+        <section id="home" class="active-section">
+            <div class="hero">
+                <h1>Microjuegos de los Objetivos de Desarrollo Sostenible</h1>
+                <p>Juega, aprende y contribuye a un futuro mejor.</p>
+                <button class="cta-button" onclick="document.querySelector('[data-section=\'play\']').click()">Empezar a
+                    Jugar</button>
+            </div>
+            <div class="sdg-wheel">
+                <!-- Decorative ODS Wheel or Grid can go here -->
+                <div class="sdg-item" style="background-color: #E5243B;">1</div>
+                <div class="sdg-item" style="background-color: #DDA63A;">2</div>
+                <div class="sdg-item" style="background-color: #4C9F38;">3</div>
+                <div class="sdg-item" style="background-color: #C5192D;">4</div>
+                <div class="sdg-item" style="background-color: #FF3A21;">5</div>
+                <div class="sdg-item" style="background-color: #26BDE2;">6</div>
+                <!-- ... add more as needed/desired for visual -->
+            </div>
+        </section>
+
+        <!-- Jugar -->
+        <section id="play">
+            <div class="game-container">
+                <div class="hud">
+                    <div class="hud-item">❤️ Vidas: <span id="lives">3</span></div>
+                    <div class="hud-item">🏆 Puntos: <span id="score">0</span></div>
+                    <div class="hud-item">⚡ Dificultad: <span id="difficulty">1</span></div>
+                </div>
+                <div id="game-area">
+                    <div class="placeholder-game">
+                        <h2>Área de Juego</h2>
+                        <p>Selecciona un microjuego para empezar (Lógica futura)</p>
+                        <button onclick="game.startGame()">Simular Inicio Juego</button>
+                        <br><br>
+                        <button onclick="game.addScore(10)">Simular +10 Puntos</button>
+                        <button onclick="game.loseLife()">Simular Perder Vida</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Documentación -->
+        <section id="docs">
+            <div class="docs-content">
+                <h2>Documentación del Proyecto</h2>
+
+                <article>
+                    <h3>Concepto y Filosofía</h3>
+                    <p><strong>Nombre:</strong> Microjuegos ODS</p>
+                    <p><strong>Género:</strong> Arcade / Microjuegos</p>
+                    <p><strong>Objetivo:</strong> Concienciar sobre los Objetivos de Desarrollo Sostenible a través de
+                        mecánicas rápidas y divertidas.</p>
+                    <p><strong>Público:</strong> Estudiantes y público general interesado en sostenibilidad.</p>
+                </article>
+
+                <article>
+                    <h3>Mecánicas</h3>
+                    <ul>
+                        <li><strong>Vidas:</strong> El jugador comienza con 3 vidas. Perder un minijuego resta una vida.
+                        </li>
+                        <li><strong>Puntos:</strong> Se ganan puntos al completar con éxito cada microjuego.</li>
+                        <li><strong>Dificultad:</strong> Escala automáticamente. Nivel 2 a los 10 puntos, Nivel 3 a los
+                            20 puntos.</li>
+                    </ul>
+                </article>
+
+                <article>
+                    <h3>Detalles de Microjuegos (Planificación)</h3>
+                    <div class="microgame-card">
+                        <h4>Juego 1: [Nombre Pendiente]</h4>
+                        <p>Descripción breve del primer microjuego.</p>
+                    </div>
+                    <div class="microgame-card">
+                        <h4>Juego 2: [Nombre Pendiente]</h4>
+                        <p>Descripción breve del segundo microjuego.</p>
+                    </div>
+                    <div class="microgame-card">
+                        <h4>Juego 3: [Nombre Pendiente]</h4>
+                        <p>Descripción breve del tercer microjuego.</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Diario de Desarrollo -->
+        <section id="dev-diary">
+            <h2>Diario de Desarrollo - Día 1</h2>
+            <div class="diary-entry">
+                <span class="date">Fecha: 12 de febrero de 2026</span>
+                <p>Tareas realizadas:</p>
+                <ul>
+                    <li>Configuración del entorno: Creación del repositorio en GitHub y estructuración de ramas (main,
+                        juego-1, juego-2, juego-3) para un flujo de trabajo profesional.</li>
+                    <li>Arquitectura de la información: Definición de la estructura Single Page Application (SPA) con
+                        secciones de Juego, Documentación y Diario.</li>
+                    <li>Diseño y Concepto: Establecimiento de la estética visual basada en los ODS y configuración del
+                        sistema global de puntuación, vidas y dificultad dinámica (niveles a los 10 y 20 puntos).</li>
+                    <li>Herramientas: Uso de Antigravity para el esqueleto base del proyecto.</li>
+                </ul>
+            </div>
+            <!-- More entries can be added here -->
+        </section>
+    </main>
+
+    <script src="js/game.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
