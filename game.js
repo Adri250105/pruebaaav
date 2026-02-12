@@ -10,7 +10,9 @@ const game = {
     animationFrameId: null,
     lastTime: 0,
     spawnTimer: 0,
+    spawnTimer: 0,
     mousePos: { x: 0, y: 0 },
+    timeLeft: 30,
 
     init: function () {
         // Prepare DOM if necessary, but startGame handles the canvas creation
@@ -76,6 +78,7 @@ const game = {
         this.lives = 3;
         this.score = 0;
         this.difficulty = 1;
+        this.timeLeft = 30;
         this.items = [];
         this.inputMode = 'mouse';
         this.keys = { left: false, right: false };
@@ -119,6 +122,15 @@ const game = {
     inputMode: 'mouse', // 'mouse' or 'keyboard'
 
     update: function (deltaTime) {
+        // Timer
+        this.timeLeft -= deltaTime / 1000;
+        if (this.timeLeft <= 0) {
+            this.timeLeft = 0;
+            this.gameOver();
+            return;
+        }
+        this.updateHUD();
+
         // Player Movement
         if (this.inputMode === 'mouse') {
             // Lerp for smooth mouse movement
@@ -261,6 +273,7 @@ const game = {
     updateHUD: function () {
         document.getElementById('lives').textContent = this.lives;
         document.getElementById('score').textContent = this.score;
+        document.getElementById('timer').textContent = Math.ceil(this.timeLeft);
         const diffText = this.difficulty === 1 ? '1 (Lento)' : this.difficulty === 2 ? '2 (Rápido + Peces)' : '3 (ZigZag)';
         document.getElementById('difficulty').textContent = diffText;
     },
@@ -273,6 +286,7 @@ const game = {
             <div class="placeholder-game">
                 <h2>¡Juego Terminado!</h2>
                 <p>Puntuación final: ${this.score}</p>
+                <p>${this.timeLeft <= 0 ? "¡Tiempo Agotado!" : "¡Te quedaste sin vidas!"}</p>
                 <button onclick="game.startGame()">Jugar de nuevo</button>
             </div>
         `;
@@ -280,3 +294,4 @@ const game = {
 };
 
 window.game = game;
+
