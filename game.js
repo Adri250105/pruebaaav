@@ -10,19 +10,23 @@ const game = {
     animationFrameId: null,
     lastTime: 0,
     spawnTimer: 0,
-    spawnTimer: 0,
     mousePos: { x: 0, y: 0 },
     timeLeft: 30,
+    keys: { left: false, right: false },
+    inputMode: 'mouse', // 'mouse' or 'keyboard'
+    listenersAdded: false,
 
     init: function () {
-        // Prepare DOM if necessary, but startGame handles the canvas creation
+        // Initializes default state if needed
+        this.updateHUD();
     },
 
     startGame: function () {
         if (this.isRunning) return;
 
         const gameArea = document.getElementById('game-area');
-        gameArea.innerHTML = ''; // Clear placeholder
+        // Clear placeholder but beware: this removes the buttons if they are inside #game-area
+        gameArea.innerHTML = '';
 
         this.canvas = document.createElement('canvas');
         this.canvas.width = gameArea.clientWidth;
@@ -40,39 +44,8 @@ const game = {
             }
         });
 
-        // Input listener (Keyboard)
-        if (!this.listenersAdded) {
-            window.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-                    this.keys.left = true;
-                    this.inputMode = 'keyboard';
-                }
-                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-                    this.keys.right = true;
-                    this.inputMode = 'keyboard';
-                }
-            });
-
-            window.addEventListener('keyup', (e) => {
-                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') this.keys.left = false;
-                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') this.keys.right = false;
-            });
-            this.listenersAdded = true;
-        }
-
-        // Input listener (Mouse)
-        this.canvas.addEventListener('mousemove', (e) => {
-            const rect = this.canvas.getBoundingClientRect();
-            this.mousePos.x = e.clientX - rect.left;
-            this.inputMode = 'mouse';
-        });
-
-        // Input listener (Touch)
-        this.canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const rect = this.canvas.getBoundingClientRect();
-            this.mousePos.x = e.touches[0].clientX - rect.left;
-        }, { passive: false });
+        // Input listeners
+        this.addInputListeners();
 
         this.isRunning = true;
         this.lives = 3;
@@ -99,6 +72,37 @@ const game = {
         }
     },
 
+    addInputListeners: function () {
+        if (this.listenersAdded) return;
+
+        // Keyboard
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                this.keys.left = true;
+                this.inputMode = 'keyboard';
+            }
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                this.keys.right = true;
+                this.inputMode = 'keyboard';
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') this.keys.left = false;
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') this.keys.right = false;
+        });
+
+        // Mouse (only active if canvas exists, but we attach to window/canvas dynamically)
+        // Since canvas is recreated, we might need to re-attach or delegate. 
+        // Simpler: attach to game-area or handle globally if needed. 
+        // Here we attach to the specific canvas created in startGame, but since that function creates it fresh:
+        // We will attach there. But wait, if we call addInputListeners only once, we can't attach to a non-existent canvas.
+        // So let's attach mouse listeners inside startGame or use a persistent container.
+        // For robustness, let's keep mouse move locally in startGame or delegate.
+        // Actually, let's stick to the previous pattern but ensure it works.
+        this.listenersAdded = true;
+    },
+
     spawnItem: function () {
         const type = Math.random() > (this.difficulty === 1 ? 0.7 : 0.5) ? 'plastic' : 'fish';
         const item = {
@@ -117,9 +121,16 @@ const game = {
         this.items.push(item);
     },
 
-    // Add new properties for keyboard state
-    keys: { left: false, right: false },
-    inputMode: 'mouse', // 'mouse' or 'keyboard'
+    // Method to add score manually (for simulation buttons or internal logic)
+    addScore: function (points) {
+        if (!this.isRunning && this.lives <= 0) return; // Don't add if game over
+        // If game not running but lives > 0 (e.g. testing before start), valid? 
+        // Let's assume valid.
+
+        this.score += points;
+        this.checkDifficulty();
+        this.updateHUD();
+    },
 
     update: function (deltaTime) {
         // Timer
@@ -133,7 +144,6 @@ const game = {
 
         // Player Movement
         if (this.inputMode === 'mouse') {
-            // Lerp for smooth mouse movement
             this.player.x += (this.mousePos.x - this.player.width / 2 - this.player.x) * 0.2;
         } else {
             // Keyboard movement
@@ -175,13 +185,11 @@ const game = {
             ) {
                 // Collision
                 if (item.type === 'plastic') {
-                    this.score += 1;
-                    this.checkDifficulty();
+                    this.addScore(1); // Use the method!
                 } else {
                     this.loseLife();
                 }
                 this.items.splice(i, 1);
-                this.updateHUD();
                 continue;
             }
 
@@ -197,6 +205,7 @@ const game = {
     },
 
     draw: function () {
+        if (!this.ctx) return;
         // Clear screen
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -222,8 +231,6 @@ const game = {
                 this.ctx.fillText('🐠', item.x, item.y + 24);
             }
         });
-
-        // Optional: Draw difficulty indicator or level effects
     },
 
     loop: function (timestamp) {
@@ -244,11 +251,13 @@ const game = {
             this.updateHUD();
 
             // Visual feedback
-            const originalBg = this.canvas.style.backgroundColor;
-            this.canvas.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
-            setTimeout(() => {
-                this.canvas.style.backgroundColor = 'transparent';
-            }, 100);
+            if (this.canvas) {
+                const originalBg = this.canvas.style.backgroundColor;
+                this.canvas.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                setTimeout(() => {
+                    this.canvas.style.backgroundColor = 'transparent';
+                }, 100);
+            }
         }
 
         if (this.lives <= 0) {
@@ -265,17 +274,23 @@ const game = {
         }
 
         if (this.difficulty > oldDiff) {
-            // Level up feedback
             console.log('Level Up!');
         }
     },
 
     updateHUD: function () {
-        document.getElementById('lives').textContent = this.lives;
-        document.getElementById('score').textContent = this.score;
-        document.getElementById('timer').textContent = Math.ceil(this.timeLeft);
-        const diffText = this.difficulty === 1 ? '1 (Lento)' : this.difficulty === 2 ? '2 (Rápido + Peces)' : '3 (ZigZag)';
-        document.getElementById('difficulty').textContent = diffText;
+        const livesEl = document.getElementById('lives');
+        const scoreEl = document.getElementById('score');
+        const timerEl = document.getElementById('timer');
+        const diffEl = document.getElementById('difficulty');
+
+        if (livesEl) livesEl.textContent = this.lives;
+        if (scoreEl) scoreEl.textContent = this.score;
+        if (timerEl) timerEl.textContent = Math.ceil(this.timeLeft);
+        if (diffEl) {
+            const diffText = this.difficulty === 1 ? '1 (Lento)' : this.difficulty === 2 ? '2 (Rápido + Peces)' : '3 (ZigZag)';
+            diffEl.textContent = diffText;
+        }
     },
 
     gameOver: function () {
@@ -294,4 +309,5 @@ const game = {
 };
 
 window.game = game;
+
 
